@@ -1,19 +1,40 @@
 plugins {
     id 'java'
+    id 'application' // opcional si tenés un main
 }
-
-group = 'org.example'
+group = 'org.app'
 version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
 }
-
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-}
+    // Hibernate (versión compatible con Java 21)
+    implementation 'org.hibernate.orm:hibernate-core:6.4.4.Final'
 
+    // Jakarta Persistence
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+
+    // MySQL JDBC Driver
+    implementation 'com.mysql:mysql-connector-j:8.2.0'
+
+    // Testing
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+    testImplementation 'org.mockito:mockito-core:5.10.0'
+
+    // Logging
+    implementation 'org.slf4j:slf4j-api:2.0.7'
+    testImplementation 'org.slf4j:slf4j-simple:2.0.7'
+}
 test {
     useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
