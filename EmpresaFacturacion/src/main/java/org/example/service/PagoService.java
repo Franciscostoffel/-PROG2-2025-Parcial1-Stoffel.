@@ -147,7 +147,6 @@ public class PagoService {
     public List<ResumenFinancieroDTO> obtenerResumenFinancieroContratosNoCancelados() {
         EntityManager em = HibernateUtil.getSession().unwrap(EntityManager.class);
 
-        // Buscar contratos ACTIVO o VENCIDO
         TypedQuery<ContratoServicio> query = em.createQuery(
                 "SELECT c FROM ContratoServicio c WHERE c.estado IN (:estado1, :estado2)",
                 ContratoServicio.class
@@ -164,7 +163,6 @@ public class PagoService {
             if (meses == 0) meses = 1;
             BigDecimal totalEsperado = contrato.getTarifaMensual().multiply(BigDecimal.valueOf(meses));
 
-            // Calcular monto pagado hasta el momento
             TypedQuery<BigDecimal> pagoQuery = em.createQuery(
                     "SELECT COALESCE(SUM(p.monto), 0) FROM PagoServicio p WHERE p.contrato.id = :id",
                     BigDecimal.class
@@ -172,7 +170,6 @@ public class PagoService {
             pagoQuery.setParameter("id", contrato.getId());
             BigDecimal totalPagado = pagoQuery.getSingleResult();
 
-            // Agregar al resumen
             resumen.add(new ResumenFinancieroDTO(
                     contrato.getId(),
                     contrato.getNombreCliente(),
@@ -182,6 +179,9 @@ public class PagoService {
             ));
         }
         return resumen;
+    }
+
+    public void setEntityManager(EntityManager emMock) {
     }
 }
 
