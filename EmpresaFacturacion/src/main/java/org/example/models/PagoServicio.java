@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "pago_servicio")
-public class Pago {
+public class PagoServicio {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_pago")
@@ -15,7 +15,7 @@ public class Pago {
 
     @ManyToOne
     @JoinColumn(name = "id_contrato", nullable = false)
-    private Contrato contrato;
+    private ContratoServicio contrato;
 
     @Column(name = "fecha_pago", nullable = false)
     private LocalDate fechaPago;
@@ -24,8 +24,8 @@ public class Pago {
     private BigDecimal monto;
 
     // Getters y setters...
-    public Pago() {}
-    public Pago(Long id, Contrato contrato, LocalDate fechaPago, BigDecimal monto) {
+    public PagoServicio() {}
+    public PagoServicio(Long id, ContratoServicio contrato, LocalDate fechaPago, BigDecimal monto) {
         this.id = id;
         this.contrato = contrato;
         this.fechaPago = fechaPago;
@@ -37,10 +37,10 @@ public class Pago {
     public void setId(Long id) {
         this.id = id;
     }
-    public Contrato getContrato() {
+    public ContratoServicio getContrato() {
         return contrato;
     }
-    public void setContrato(Contrato contrato) {
+    public void setContrato(ContratoServicio contrato) {
         this.contrato = contrato;
     }
     public LocalDate getFechaPago() {

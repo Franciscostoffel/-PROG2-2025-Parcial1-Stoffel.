@@ -6,13 +6,11 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import org.example.dto.ContratoDTO;
-import org.example.dto.EstadoContratoDTO;
-import org.example.dto.FiltroContratoDTO;
-import org.example.dto.PagoDTO;
+import org.example.dto.*;
 import org.example.enums.Estado;
-import org.example.models.Contrato;
-import org.example.models.Pago;
+import org.example.enums.TipoServicio;
+import org.example.models.ContratoServicio;
+import org.example.models.PagoServicio;
 import org.example.utils.HibernateUtil;
 
 import java.math.BigDecimal;
@@ -35,12 +33,12 @@ public class PagoService {
     public EstadoContratoDTO registrarPago(PagoDTO dto) {
         EntityManager em = HibernateUtil.getSession().unwrap(EntityManager.class);
 
-        Contrato contrato = em.find(Contrato.class, dto.getIdContrato());
+        ContratoServicio contrato = em.find(ContratoServicio.class, dto.getIdContrato());
 
         if (contrato == null) {
             throw new RuntimeException("Contrato no encontrado con ID: " + dto.getIdContrato());
         }
-        Pago nuevoPago = new Pago();
+        PagoServicio nuevoPago = new PagoServicio();
         nuevoPago.setContrato(contrato);
         nuevoPago.setFechaPago(LocalDate.now());
         nuevoPago.setMonto(dto.getMonto());
@@ -74,11 +72,12 @@ public class PagoService {
 
         return new EstadoContratoDTO(contrato.getId(), totalPagado, nuevoEstado);
     }
+
     public List<ContratoDTO> buscarContratos(FiltroContratoDTO filtro) {
         EntityManager em = HibernateUtil.getSession().unwrap(EntityManager.class);
         CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Contrato> cq = cb.createQuery(Contrato.class);
-        Root<Contrato> root = cq.from(Contrato.class);
+        CriteriaQuery<ContratoServicio> cq = cb.createQuery(ContratoServicio.class);
+        Root<ContratoServicio> root = cq.from(ContratoServicio.class);
 
         List<Predicate> predicados = new ArrayList<>();
         // Obligatorio
@@ -107,7 +106,7 @@ public class PagoService {
                 .where(cb.and(predicados.toArray(new Predicate[0])))
                 .orderBy(cb.desc(root.get("fechaInicio")));
 
-        List<Contrato> resultados = em.createQuery(cq).getResultList();
+        List<ContratoServicio> resultados = em.createQuery(cq).getResultList();
         return resultados.stream().map(c -> new ContratoDTO(
                 c.getId(),
                 c.getNombreCliente(),
@@ -119,5 +118,70 @@ public class PagoService {
         )).toList();
     }
 
+    public List<ResumenCanceladosDTO> resumenContratosCancelados(LocalDate desde, LocalDate hasta) {
+        EntityManager em = HibernateUtil.getSession().unwrap(EntityManager.class);
+
+        String jpql = "SELECT c.tipoServicio, COUNT(c), SUM(c.tarifaMensual * TIMESTAMPDIFF(MONTH, c.fechaInicio, c.fechaFin)) " +
+                "FROM ContratoServicio c " +
+                "WHERE c.estado = :estado " +
+                "AND c.fechaInicio BETWEEN :desde AND :hasta " +
+                "GROUP BY c.tipoServicio";
+
+        List<Object[]> resultados = em.createQuery(jpql, Object[].class)
+                .setParameter("estado", Estado.CANCELADO)
+                .setParameter("desde", desde)
+                .setParameter("hasta", hasta)
+                .getResultList();
+
+        List<ResumenCanceladosDTO> resumen = new ArrayList<>();
+
+        for (Object[] fila : resultados) {
+            TipoServicio tipoServicio = TipoServicio.valueOf(((TipoServicio) fila[0]).name());
+            Long cantidad = (Long) fila[1];
+            BigDecimal montoTotal = new BigDecimal(fila[2].toString());
+            resumen.add(new ResumenCanceladosDTO(tipoServicio, cantidad, montoTotal));
+        }
+        return resumen;
+    }
+
+    public List<ResumenFinancieroDTO> obtenerResumenFinancieroContratosNoCancelados() {
+        EntityManager em = HibernateUtil.getSession().unwrap(EntityManager.class);
+
+        // Buscar contratos ACTIVO o VENCIDO
+        TypedQuery<ContratoServicio> query = em.createQuery(
+                "SELECT c FROM ContratoServicio c WHERE c.estado IN (:estado1, :estado2)",
+                ContratoServicio.class
+        );
+        query.setParameter("estado1", Estado.ACTIVO);
+        query.setParameter("estado2", Estado.VENCIDO);
+
+        List<ContratoServicio> contratos = query.getResultList();
+        List<ResumenFinancieroDTO> resumen = new ArrayList<>();
+
+        for (ContratoServicio contrato : contratos) {
+            // Calcular meses contratados
+            long meses = ChronoUnit.MONTHS.between(contrato.getFechaInicio(), contrato.getFechaFin());
+            if (meses == 0) meses = 1;
+            BigDecimal totalEsperado = contrato.getTarifaMensual().multiply(BigDecimal.valueOf(meses));
+
+            // Calcular monto pagado hasta el momento
+            TypedQuery<BigDecimal> pagoQuery = em.createQuery(
+                    "SELECT COALESCE(SUM(p.monto), 0) FROM PagoServicio p WHERE p.contrato.id = :id",
+                    BigDecimal.class
+            );
+            pagoQuery.setParameter("id", contrato.getId());
+            BigDecimal totalPagado = pagoQuery.getSingleResult();
+
+            // Agregar al resumen
+            resumen.add(new ResumenFinancieroDTO(
+                    contrato.getId(),
+                    contrato.getNombreCliente(),
+                    contrato.getTipoServicio().name(),
+                    totalEsperado,
+                    totalPagado
+            ));
+        }
+        return resumen;
+    }
 }
 

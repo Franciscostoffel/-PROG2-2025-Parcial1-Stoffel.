@@ -23,7 +23,7 @@
         <property name="hibernate.hbm2ddl.auto">update</property>
 
         <!-- Entity mappings -->
-        <mapping class="org.example.models.Contrato"/>
-        <mapping class="org.example.models.Pago"/>
+        <mapping class="org.example.models.ContratoServicio"/>
+        <mapping class="org.example.models.PagoServicio"/>
     </session-factory>
 </hibernate-configuration>

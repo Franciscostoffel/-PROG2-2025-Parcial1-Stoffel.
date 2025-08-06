@@ -9,7 +9,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "contrato_servicio")
-public class Contrato {
+public class ContratoServicio {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_contrato")
@@ -36,12 +36,12 @@ public class Contrato {
     private Estado estado = Estado.ACTIVO;
 
     @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Pago> pagos;
+    private List<PagoServicio> pagos;
 
-    public Contrato() {}
-    public Contrato(Long id, String nombreCliente, TipoServicio tipoServicio,
-                    BigDecimal tarifaMensual, LocalDate fechaInicio,
-                    LocalDate fechaFin, Estado estado) {
+    public ContratoServicio() {}
+    public ContratoServicio(Long id, String nombreCliente, TipoServicio tipoServicio,
+                            BigDecimal tarifaMensual, LocalDate fechaInicio,
+                            LocalDate fechaFin, Estado estado) {
         this.id = id;
         this.nombreCliente = nombreCliente;
         this.tipoServicio = tipoServicio;
@@ -92,13 +92,13 @@ public Estado getEstado() {
 public void setEstado(Estado estado) {
         this.estado = estado;
     }
-public List<Pago> getPagos() {
+public List<PagoServicio> getPagos() {
         return pagos;
     }
-public void setPagos(List<Pago> pagos) {
+public void setPagos(List<PagoServicio> pagos) {
         this.pagos = pagos;
     }
-public void addPago(Pago pago) {
+public void addPago(PagoServicio pago) {
         pagos.add(pago);
         pago.setContrato(this);
     }
