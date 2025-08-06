@@ -32,7 +32,6 @@ public class PagoService {
     }
     public EstadoContratoDTO registrarPago(PagoDTO dto) {
         EntityManager em = HibernateUtil.getSession().unwrap(EntityManager.class);
-
         ContratoServicio contrato = em.find(ContratoServicio.class, dto.getIdContrato());
 
         if (contrato == null) {
@@ -69,7 +68,6 @@ public class PagoService {
         contrato.setEstado(nuevoEstado);
         em.merge(contrato);
         em.getTransaction().commit();
-
         return new EstadoContratoDTO(contrato.getId(), totalPagado, nuevoEstado);
     }
 
@@ -80,28 +78,22 @@ public class PagoService {
         Root<ContratoServicio> root = cq.from(ContratoServicio.class);
 
         List<Predicate> predicados = new ArrayList<>();
-        // Obligatorio
         predicados.add(cb.like(cb.lower(root.get("nombreCliente")), "%" + filtro.getNombreCliente().toLowerCase() + "%"));
-        // Opcional
         if (filtro.getTipoServicio() != null) {
             predicados.add(cb.equal(root.get("tipoServicio"), Enum.valueOf(org.example.enums.TipoServicio.class, filtro.getTipoServicio())));
         }
-        // Opcional
         if (filtro.getFechaInicioDesde() != null) {
             predicados.add(cb.greaterThanOrEqualTo(root.get("fechaInicio"), filtro.getFechaInicioDesde()));
         }
         if (filtro.getFechaInicioHasta() != null) {
             predicados.add(cb.lessThanOrEqualTo(root.get("fechaInicio"), filtro.getFechaInicioHasta()));
         }
-
-        // Opcional: Rango de tarifas
         if (filtro.getTarifaDesde() != null) {
             predicados.add(cb.greaterThanOrEqualTo(root.get("tarifaMensual"), filtro.getTarifaDesde()));
         }
         if (filtro.getTarifaHasta() != null) {
             predicados.add(cb.lessThanOrEqualTo(root.get("tarifaMensual"), filtro.getTarifaHasta()));
         }
-
         cq.select(root)
                 .where(cb.and(predicados.toArray(new Predicate[0])))
                 .orderBy(cb.desc(root.get("fechaInicio")));
@@ -117,7 +109,6 @@ public class PagoService {
                 c.getEstado().name()
         )).toList();
     }
-
     public List<ResumenCanceladosDTO> resumenContratosCancelados(LocalDate desde, LocalDate hasta) {
         EntityManager em = HibernateUtil.getSession().unwrap(EntityManager.class);
 
@@ -146,7 +137,6 @@ public class PagoService {
 
     public List<ResumenFinancieroDTO> obtenerResumenFinancieroContratosNoCancelados() {
         EntityManager em = HibernateUtil.getSession().unwrap(EntityManager.class);
-
         TypedQuery<ContratoServicio> query = em.createQuery(
                 "SELECT c FROM ContratoServicio c WHERE c.estado IN (:estado1, :estado2)",
                 ContratoServicio.class
@@ -158,7 +148,6 @@ public class PagoService {
         List<ResumenFinancieroDTO> resumen = new ArrayList<>();
 
         for (ContratoServicio contrato : contratos) {
-            // Calcular meses contratados
             long meses = ChronoUnit.MONTHS.between(contrato.getFechaInicio(), contrato.getFechaFin());
             if (meses == 0) meses = 1;
             BigDecimal totalEsperado = contrato.getTarifaMensual().multiply(BigDecimal.valueOf(meses));
@@ -180,7 +169,6 @@ public class PagoService {
         }
         return resumen;
     }
-
     public void setEntityManager(EntityManager emMock) {
     }
 }

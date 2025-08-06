@@ -27,7 +27,7 @@ public class Main {
         PagoService pagoService = PagoService.getInstancia();
         pagoService.registrarPago(new PagoDTO(c1.getId(), new BigDecimal("2000")));
         pagoService.registrarPago(new PagoDTO(c2.getId(), new BigDecimal("1500")));
-        // Buscar contratos por nombre
+
         FiltroContratoDTO filtro = new FiltroContratoDTO();
         filtro.setNombreCliente("Juan");
         System.out.println("🔎 Contratos encontrados:");
@@ -38,8 +38,8 @@ public class Main {
                     ", Estado: " + c.getEstado() +
                     ", Tarifa: $" + c.getTarifaMensual());
         });
-        // Resumen contratos cancelados
-        System.out.println("\n📊 Resumen de contratos CANCELADOS:");
+
+        System.out.println("\n Resumen de contratos CANCELADOS:");
         pagoService.resumenContratosCancelados(
                 LocalDate.of(2024, 1, 1),
                 LocalDate.of(2024, 12, 31)
@@ -48,8 +48,8 @@ public class Main {
                     ", Cantidad: " + r.getCantidadContratos() +
                     ", Monto total: $" + r.getMontoTotalCobrado());
         });
-        // Resumen financiero de contratos no cancelados
-        System.out.println("\n💰 Resumen financiero de contratos ACTIVO o VENCIDO:");
+
+        System.out.println("\n Resumen financiero de contratos ACTIVO o VENCIDO:");
         pagoService.obtenerResumenFinancieroContratosNoCancelados().forEach(r -> {
             System.out.println(" - ID: " + r.getIdContrato() +
                     ", Cliente: " + r.getNombreCliente() +

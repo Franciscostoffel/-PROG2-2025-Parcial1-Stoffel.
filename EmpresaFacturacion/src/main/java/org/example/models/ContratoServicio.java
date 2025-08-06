@@ -50,58 +50,56 @@ public class ContratoServicio {
         this.fechaFin = fechaFin;
         this.estado = estado;
     }
-public Long getId() {
+    public Long getId() {
         return id;
     }
-public void setId(Long id) {
+    public void setId(Long id) {
         this.id = id;
     }
-public String getNombreCliente() {
+    public String getNombreCliente() {
         return nombreCliente;
     }
-public void setNombreCliente(String nombreCliente) {
+    public void setNombreCliente(String nombreCliente) {
         this.nombreCliente = nombreCliente;
     }
-public TipoServicio getTipoServicio() {
+    public TipoServicio getTipoServicio() {
         return tipoServicio;
     }
-public void setTipoServicio(TipoServicio tipoServicio) {
+    public void setTipoServicio(TipoServicio tipoServicio) {
         this.tipoServicio = tipoServicio;
     }
-public BigDecimal getTarifaMensual() {
+    public BigDecimal getTarifaMensual() {
         return tarifaMensual;
     }
-public void setTarifaMensual(BigDecimal tarifaMensual) {
+    public void setTarifaMensual(BigDecimal tarifaMensual) {
         this.tarifaMensual = tarifaMensual;
     }
-public LocalDate getFechaInicio() {
+    public LocalDate getFechaInicio() {
         return fechaInicio;
     }
-public void setFechaInicio(LocalDate fechaInicio) {
+    public void setFechaInicio(LocalDate fechaInicio) {
         this.fechaInicio = fechaInicio;
     }
-public LocalDate getFechaFin() {
+    public LocalDate getFechaFin() {
         return fechaFin;
     }
-public void setFechaFin(LocalDate fechaFin) {
+    public void setFechaFin(LocalDate fechaFin) {
         this.fechaFin = fechaFin;
     }
-public Estado getEstado() {
+    public Estado getEstado() {
         return estado;
     }
-public void setEstado(Estado estado) {
+    public void setEstado(Estado estado) {
         this.estado = estado;
     }
-public List<PagoServicio> getPagos() {
+    public List<PagoServicio> getPagos() {
         return pagos;
     }
-public void setPagos(List<PagoServicio> pagos) {
+    public void setPagos(List<PagoServicio> pagos) {
         this.pagos = pagos;
     }
-public void addPago(PagoServicio pago) {
+    public void addPago(PagoServicio pago) {
         pagos.add(pago);
         pago.setContrato(this);
     }
-
-    // Getters y setters...
 }
